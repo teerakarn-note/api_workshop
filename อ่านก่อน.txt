@@ -1,0 +1,12 @@
+npm init ลง packet json
+npm i express
+
+สร้างตารางใน database ที่ไฟล์ prisma
+migrate database
+npx prisma migrate dev --name "startProject"
+
+
+run node
+    node --watch ตามด้วยชื่อfile
+
+file .env ใช้ต่อ database
