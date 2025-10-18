@@ -87,7 +87,9 @@ app.put('/update/', async (req, res) => {
 });
 app.post('/upload', async (req, res) => {
     try {
+        // ตรวจสอบว่ามีการส่งไฟล์มาหรือไม่ ถ้ามีให้ทำต่อ
         if (req.files != undefined) {
+            // ตรวจสอบว่ามีการส่งไฟล์ img มาหรือไม่
             if (req.files.img != undefined) {
                 const img = req.files.img;
                 const fs = require('fs');
@@ -119,38 +121,50 @@ app.post('/upload', async (req, res) => {
 app.post('/uploadFromExcel', (req, res) => {
     try {
         const fileExcel = req.files.fileExcel;
-        fileExcel.mv('./uploads/' + fileExcel.name, async (err) => {
-            if (err) throw err;
+        // ตรวจสอบว่าไฟล์ที่ส่งมามีค่าไม่เป็น undefined หรือไม่ ถ้าไม่เป็น undefined ให้ทำต่อ
+        if (fileExcel != undefined) {
+            // ตรวจสอบว่าไฟล์ที่ส่งมามีค่าไม่เป็น null หรือไม่ ถ้าไม่เป็น null ให้ทำต่อ ถ้ามีค่าให้ทำต่อ
+            if (fileExcel != null) {
+                fileExcel.mv('./uploads/' + fileExcel.name, async (err) => {
+                    if (err) throw err;
 
-            const workbook = new exceljs.Workbook();
-            await workbook.xlsx.readFile('./uploads/' + fileExcel.name);
-            const ws = workbook.getWorksheet(1);
+                    const workbook = new exceljs.Workbook();
+                    await workbook.xlsx.readFile('./uploads/' + fileExcel.name);
+                    const ws = workbook.getWorksheet(1);
 
-            // อ่านข้อมูลจาก excel ตั้งแต่แถวที่ 2 เป็นต้นไปเพราะแถวที่ 1 filld
-            for (let i = 2; i <= ws.rowCount; i++) {
-                const name = ws.getRow(i).getCell(1).value ?? ""; //if null of undefined return ""
-                const cost = ws.getRow(i).getCell(2).value ?? 0; // if null of undefined return 0
-                const price = ws.getRow(i).getCell(3).value ?? 0; // if null of undefined return 0
+                    // อ่านข้อมูลจาก excel ตั้งแต่แถวที่ 2 เป็นต้นไปเพราะแถวที่ 1 filld
+                    for (let i = 2; i <= ws.rowCount; i++) {
+                        const name = ws.getRow(i).getCell(1).value ?? ""; //if null of undefined return ""
+                        const cost = ws.getRow(i).getCell(2).value ?? 0; // if null of undefined return 0
+                        const price = ws.getRow(i).getCell(3).value ?? 0; // if null of undefined return 0
 
-                // insert ข้อมูลลง database
-                if (name != "" && cost >= 0 && price >= 0) {
-                    await prisma.product.create({
-                        data: {
-                            name: name,
-                            cost: cost,
-                            price: price,
-                            img: ''
+                        // insert ข้อมูลลง database
+                        if (name != "" && cost >= 0 && price >= 0) {
+                            await prisma.product.create({
+                                data: {
+                                    name: name,
+                                    cost: cost,
+                                    price: price,
+                                    img: ''
+                                }
+                            })
                         }
-                    })
-                }
 
+                    }
+                    // remove file from server
+                    const fs = require('fs');
+                    await fs.unlinkSync('./uploads/' + fileExcel.name);
+
+                    res.send({ message: 'success' });
+
+                })
+            }else{
+                res.status(500).send({message:'FileExcel is null'});
             }
-            // remove file from server
-            const fs = require('fs');
-            await fs.unlinkSync('./uploads/' + fileExcel.name);
-
-            res.send({ message: 'success' });
-        })
+        }
+        else {
+            res.status(500).send({ message: 'FileExcel is undefined' });
+        }
     }
     catch (e) {
         res.status(500).send({ error: e.message });

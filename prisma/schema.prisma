@@ -16,7 +16,7 @@ datasource db {
 model User {
   id     Int    @id() @default(autoincrement())
   name   String
-  user   String
+  user   String @unique() //unique คือไม่ให้ซ้ำ-ชื่อผู้ใช้หรือUserไม่ให้ซ้ำกัน
   pass   String
   status String @default("use")
 }
@@ -32,22 +32,22 @@ model Product {
 }
 
 model BillSale {
-  id               Int              @id() @default(autoincrement())
-  customer         String
-  customer_phone   String
-  customer_address String
-  payDate          DateTime
-  payTime          String
-  status           String           @default("wait") //wait,pay,send
-  BillSaleDetail   BillSaleDetail[]
+  id              Int              @id() @default(autoincrement())
+  customerName    String
+  customerPhone   String
+  customerAddress String
+  payDate         DateTime
+  payTime         String
+  status          String           @default("wait") //wait,pay,send
+  BillSaleDetail  BillSaleDetail[]
 }
 
 model BillSaleDetail {
   id          Int      @id() @default(autoincrement())
   product_Id  Int
-  BillSale_Id Int
+  billSale_Id Int
   Product     Product  @relation(fields: [product_Id], references: [id]) //เชื่อมความสัมพันธ์กับตาราง Product one to many
-  BillSale    BillSale @relation(fields: [BillSale_Id], references: [id]) //เชื่อมความสัมพันธ์กับตาราง BillSale one to many
+  BillSale    BillSale @relation(fields: [billSale_Id], references: [id]) //เชื่อมความสัมพันธ์กับตาราง BillSale one to many
   cost        Int
   price       Int
 }
