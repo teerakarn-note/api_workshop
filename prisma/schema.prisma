@@ -46,8 +46,11 @@ model BillSaleDetail {
   id          Int      @id() @default(autoincrement())
   product_Id  Int
   billSale_Id Int
+
   Product     Product  @relation(fields: [product_Id], references: [id]) //เชื่อมความสัมพันธ์กับตาราง Product one to many
   BillSale    BillSale @relation(fields: [billSale_Id], references: [id]) //เชื่อมความสัมพันธ์กับตาราง BillSale one to many
+  // ตัวแปรพวกนี้เอาไปใช้
+
   cost        Int
   price       Int
 }

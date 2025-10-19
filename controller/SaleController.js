@@ -56,6 +56,10 @@ app.get('/list', async (req, res) => {
 app.get('/billInfo/:billSaleId', async (req, res) => {
     try {
         const result = await prisma.billSaleDetail.findMany({
+            //เชื่อมตาราง
+            include:{
+                Product: true
+            },
             where: {
                 //ชือfieldatabase : parseInt(req.params.ต้องให้ตรงกับ app.get('/billInfo/(ใช้ตัวนี้):billSaleId')
                 billSale_Id: parseInt(req.params.billSaleId)
