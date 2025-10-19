@@ -40,15 +40,35 @@ app.post('/save', async (req, res) => {
 });
 app.get('/list', async (req, res) => {
     try {
-        const result = await prisma.billSale.findMany({
+        //const results(ตัวแปรเก็บข้อมูลนำไปใช้ต่อ ฝั่งfontend ต้องตรงกัน
+        const results = await prisma.billSale.findMany({
             orderBy: {
                 id: 'desc'
             }
+            
+        })
+        res.send({ results: results });
+    } catch (e) {
+        res.status(500).send({ error: e.message });
+    }
+})
+
+app.get('/billInfo/:billSaleId', async (req, res) => {
+    try {
+        const result = await prisma.billSaleDetail.findMany({
+            where: {
+                //ชือfieldatabase : parseInt(req.params.ต้องให้ตรงกับ app.get('/billInfo/(ใช้ตัวนี้):billSaleId')
+                billSale_Id: parseInt(req.params.billSaleId)
+            },
+            orderBy: {
+                id: 'desc'
+            },
         })
         res.send({ result: result });
     } catch (e) {
         res.status(500).send({ error: e.message });
     }
+
 })
 
 module.exports = app;
